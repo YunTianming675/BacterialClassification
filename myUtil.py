@@ -3,9 +3,10 @@ import cv2
 
 def files_rename(path: str, start_name: str, suffix: str):
     """文件批量重命名
-    :param path: 文件所在目录
-    :param startName: 批量重命名的前缀
-    :param suffix: 文件后缀名
+    Args:
+        :param path: 文件所在目录
+        :param startName: 批量重命名的前缀
+        :param suffix: 文件后缀名
     """
     count = 0
     num = 0
@@ -38,10 +39,11 @@ def files_rename(path: str, start_name: str, suffix: str):
 
 def image_tailoring(img_path: str, save_path: str, h_step: int, w_step: int):
     """将图片进行裁剪
-    :param img_path: 要裁剪的图片的完整路径
-    :param save_path: 指定裁剪后文件的存放目录
-    :param h_step: 裁剪后子图片的高度
-    :param w_step: 裁剪后子图片的长度
+    Args:
+        :param img_path: 要裁剪的图片的完整路径
+        :param save_path: 指定裁剪后文件的存放目录
+        :param h_step: 裁剪后子图片的高度
+        :param w_step: 裁剪后子图片的长度
     """
     img = cv2.imread(img_path)
     if img is None:
@@ -88,4 +90,33 @@ def image_tailoring(img_path: str, save_path: str, h_step: int, w_step: int):
         y_num = 1
     
     print("tailoring finished, check")
+
+
+def is_all_black(img_path: str, threshold: int) -> bool:
+    """判断图像是否是全黑的
+    Args:
+        :param img_path: 图像完整路径
+        :param threshold: BGR的判断阈值
+    Returns:
+        result: 如果全黑，为True，否则为False
+    Raises:
+        FileNotFound: 如果不能读取图像，则抛出此异常
+    """
+    img = cv2.imread(img_path)
+    if img is None:
+        ex = Exception("FileNotFound")
+        raise ex
+
+    result = True
+    for i in range(len(img)):
+        for j in range(len(img[0])):
+            if img[i][j][0] < threshold and img[i][j][1] < threshold and img[i][j][2] < 30:
+                continue
+            else:
+                result = False
+                break
+
+        if not result:
+            break
+    return result
 
