@@ -1,5 +1,7 @@
-import os
 import cv2
+import json
+import os
+import pandas
 
 def files_rename(path: str, start_name: str, suffix: str):
     """文件批量重命名
@@ -119,4 +121,28 @@ def is_all_black(img_path: str, threshold: int) -> bool:
         if not result:
             break
     return result
+
+
+def csv_to_yololabel(csv_path: str, save_path: str):
+    """将csv格式的标签转为yolo格式的标签
+    Args:
+        :param csv_path: csv文件的完整路径
+        :param save_path: yolo标签的保存地址
+    """
+    csv_name = pandas.read_csv(csv_path, header=None)
+    img_name = csv_name.iloc[:, 0]
+    img_label = csv_name.iloc[:, 1]
+    for i, name in enumerate(img_name):
+        with open(os.path.join(save_path, name.split(".")[0] + ".txt"), "w") as fp:
+            fp.write(img_label[i].split("[")[1].split("]")[0])
+    print("generate yolo label finish, check")
+
+
+def json_to_yololabel(json_path: str, save_path: str):
+    """将json格式的数据转为yolo格式的数据
+    Args:
+        :param json_path: json 文件所在的路径
+        :param save_path: 指定转换后yolo格式的保存路径
+    """
+    pass
 

@@ -1,5 +1,9 @@
 /.vscode
 /__pycache__
+/dataset/csv_label
 /dataset/train_01
 /dataset/train_02
 /dataset/train_03
+/dataset/train_03_label
+/dataset/train_03_yololabel
+/dataset/yolo_label
