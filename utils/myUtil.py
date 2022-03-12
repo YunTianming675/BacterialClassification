@@ -112,7 +112,7 @@ def is_all_black(img_path: str, threshold: int) -> bool:
     result = True
     for i in range(len(img)):
         for j in range(len(img[0])):
-            if img[i][j][0] < threshold and img[i][j][1] < threshold and img[i][j][2] < 30:
+            if img[i][j][0] < threshold and img[i][j][1] < threshold and img[i][j][2] < threshold:
                 continue
             else:
                 result = False
@@ -144,5 +144,6 @@ def json_to_yololabel(json_path: str, save_path: str):
         :param json_path: json 文件所在的路径
         :param save_path: 指定转换后yolo格式的保存路径
     """
+    # TODO 后续添加
     pass
 

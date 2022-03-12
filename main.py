@@ -1,6 +1,7 @@
 import os
 
-from utils import *
+from utils import myUtil
+from utils import readYOLO
 
 
 def main():
@@ -30,7 +31,8 @@ def main():
         myUtil.files_rename(os.getcwd() + "\\dataset\\train_02\\not_black", "train_tailoring_", ".jpg")
         myUtil.csv_to_yololabel(r"D:\Project\VSCode\Python\ImageTest01\dataset\train_03_label\train_03_label.csv",
                                 r"D:\Project\VSCode\Python\ImageTest01\dataset\train_03_yololabel")
-    dataset = ReadYOLO.ReadYOLO(os.path.join(os.getcwd(), r"dataset\train_03"), os.path.join(os.getcwd(), r"dataset\yolo_label"))
+    # 下面是对ReadYOLO对象的测试
+    dataset = readYOLO.ReadYOLO(os.path.join(os.getcwd(), r"dataset\train_03"), os.path.join(os.getcwd(), r"dataset\yolo_label"), trans=True)
     pic, target = dataset.__getitem__(0)
     print(pic)
     print(target)
