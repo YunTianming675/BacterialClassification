@@ -59,7 +59,8 @@ class ReadYOLO(Dataset):
             array_target = numpy.concatenate(list_target, axis=0).reshape(len(list_target), -1)  # 将读到的内容拼接为array数组
         picture = cv2.imread(img_dir)  # array = [w, h, 3]
         if self.trans:
-            picture, array_target = data_augment.DataAugment().detect_resize(picture, array_target, (224, 224))
+            # picture, array_target = data_augment.DataAugment().detect_resize(picture, array_target, (224, 224))
+            picture, array_target = self.trans(picture, array_target, (224, 224))
             # BUG 下面这行有隐患：标签使用了字符串而非数字，导致可能不能将所有数据转为CUDA类型
             return picture.unsqueeze(0).to(self.device), array_target
         else:
