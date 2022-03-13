@@ -1,4 +1,5 @@
 /.vscode
+/.idea
 /__pycache__
 /utils/__pycache__
 /dataset
@@ -8,3 +9,4 @@
 /dataset/train_03_label
 /dataset/train_03_yololabel
 /dataset/yolo_label
+/weights

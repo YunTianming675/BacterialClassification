@@ -43,15 +43,15 @@ class ReadYOLO(Dataset):
             读取到的图像和图像对应的标签；如果使能了增强，则会返回增强后的图像
         """
         list_target = []
-        img = self.imgs[list(map(lambda x: x == self.labels[item].split(".")[0], self.imgs_name)).index(True)]  # 通过标签寻找对应的图片是哪一张
+        # 通过标签寻找对应的图片是哪一张
+        img = self.imgs[list(map(lambda x: x == self.labels[item].split(".")[0], self.imgs_name)).index(True)]
         img_dir = os.path.join(self.imgs_dir, img)
         with open(os.path.join(self.label_path, self.labels[item]), "r") as fp:
             for line in fp.readlines():
                 if len(line.strip("\n")) > 0:  # 去掉换行符，如果去掉后长度依然>0，则表示这一行不是空的
                     nums = line.strip().split(" ")  # strip() 不带参数表示将字符串最前和最后的空格去掉，然后以空格进行切片
                     # 将切片后的字符串转为float型并存于一个列表，此时得到了一行的数值
-                    # 此处因为设置的标签为string，故改为str类型
-                    li = [*map(lambda x: str(x), nums)]
+                    li = [*map(lambda x: int(x), nums)]
                     list_target.append(li)  # 将得到的数值保存
         if len(list_target) == 0:
             array_target = numpy.array([])
@@ -61,8 +61,7 @@ class ReadYOLO(Dataset):
         if self.trans:
             # picture, array_target = data_augment.DataAugment().detect_resize(picture, array_target, (224, 224))
             picture, array_target = self.trans(picture, array_target, (224, 224))
-            # BUG 下面这行有隐患：标签使用了字符串而非数字，导致可能不能将所有数据转为CUDA类型
-            return picture.unsqueeze(0).to(self.device), array_target
+            return picture.unsqueeze(0).to(self.device), torch.from_numpy(array_target).to(self.device)
         else:
             return picture, array_target
 

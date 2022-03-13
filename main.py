@@ -5,37 +5,41 @@ from utils import readYOLO
 
 
 def main():
-    img_process = False
-    if img_process:
-        myUtil.files_rename(os.getcwd() + "\\dataset\\train\\image", "image_train_", ".jpg")
-        myUtil.files_rename(os.getcwd() + "\\dataset\\test\\image", "image_test_", ".jpg")
+    img_tailoring = False
+    if img_tailoring:
+        imgs_path = os.path.join(os.getcwd(), r"dataset\changedImages")
+        imgs = os.listdir(imgs_path)
+        tail_save_path = os.path.join(os.getcwd(), r"dataset\changedImagesTailoring")
+        for i in range(len(imgs)):
+            img_path = os.path.join(imgs_path, imgs[i])
+            myUtil.image_tailoring(img_path, tail_save_path, 224, 224)
 
-        path = r"D:\\Project\\VSCode\\Python\\ImageTest01\\dataset\\train_02"
-        savePath = r"D:\\Project\\VSCode\\Python\\ImageTest01\\dataset\\train_02\\tailoring"
-        img_list = os.listdir(path)
-        for i in range(len(img_list)):
-            img_path = path + "\\" + img_list[i]
-            myUtil.image_tailoring(img_path, savePath, 300, 400)
-
-        tailored_file_list = os.listdir(savePath)
-        target_dir = r" D:\\Project\\VSCode\\Python\\ImageTest01\\dataset\\train_02\\not_black\\"
-        for i in range(len(tailored_file_list)):
-            if myUtil.is_all_black(savePath + "\\" + tailored_file_list[i], 30):
+    filter_all_black = False
+    if filter_all_black:
+        imgs_path = os.path.join(os.getcwd(), r"dataset\changedImagesTailoring")
+        imgs = os.listdir(imgs_path)
+        filter_save_path = os.path.join(os.getcwd(), r"dataset\TailoringNotAllBlack")
+        for i in range(len(imgs)):
+            if myUtil.is_all_black(os.path.join(imgs_path, imgs[i]), 40):
                 continue
             else:
-                copy_name = "copy " + savePath + "\\" + tailored_file_list[i] + target_dir
-                if os.path.isfile(copy_name):
-                    continue
-                else:
-                    os.system(copy_name)
-        myUtil.files_rename(os.getcwd() + "\\dataset\\train_02\\not_black", "train_tailoring_", ".jpg")
-        myUtil.csv_to_yololabel(r"D:\Project\VSCode\Python\ImageTest01\dataset\train_03_label\train_03_label.csv",
-                                r"D:\Project\VSCode\Python\ImageTest01\dataset\train_03_yololabel")
-    # 下面是对ReadYOLO对象的测试
-    dataset = readYOLO.ReadYOLO(os.path.join(os.getcwd(), r"dataset\train_03"), os.path.join(os.getcwd(), r"dataset\yolo_label"), trans=True)
-    pic, target = dataset.__getitem__(0)
-    print(pic)
-    print(target)
+                command = "copy " + imgs_path + "\\" + imgs[i] + " " + filter_save_path
+                os.system(command)
+
+    label_conversion = False
+    if label_conversion:
+        myUtil.csv_to_yololabel(os.path.join(os.getcwd(), r"dataset\train\1st_train.csv"),
+                                os.path.join(os.getcwd(), r"dataset\train\label"))
+
+    test_ReadYOLO = False
+    if test_ReadYOLO:
+        dataset = readYOLO.ReadYOLO(os.path.join(os.getcwd(), r"dataset\train\image"),
+                                    os.path.join(os.getcwd(), r"dataset\train\label"),
+                                    trans=False)
+        pic, target = dataset.__getitem__(0)
+        print(pic.shape)
+        print(target)
+
 
 if __name__ == "__main__":
     main()

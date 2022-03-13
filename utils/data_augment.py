@@ -1,5 +1,6 @@
 import torchvision
 
+
 class DataAugment(object):
     def __init__(self):
         super(DataAugment, self).__init__()

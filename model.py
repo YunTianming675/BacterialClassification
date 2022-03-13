@@ -4,6 +4,7 @@ from torch import nn
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 # 前 3 层中是没有 1x1 卷积的，故这里默认False
 def VGG_block(input_channel, output_channel, use_1x1=False):
     """构建VGG块

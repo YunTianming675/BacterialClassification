@@ -4,6 +4,7 @@ from torch import nn
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 class MyLoss(nn.Module):
     # 相当于nn.CrossEntropyLoss
     def __init__(self):
