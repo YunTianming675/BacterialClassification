@@ -20,7 +20,7 @@ def main():
         imgs = os.listdir(imgs_path)
         filter_save_path = os.path.join(os.getcwd(), r"dataset\TailoringNotAllBlack")
         for i in range(len(imgs)):
-            if myUtil.is_all_black(os.path.join(imgs_path, imgs[i]), 40):
+            if myUtil.is_all_black(os.path.join(imgs_path, imgs[i]), 50):
                 continue
             else:
                 command = "copy " + imgs_path + "\\" + imgs[i] + " " + filter_save_path
@@ -39,6 +39,13 @@ def main():
         pic, target = dataset.__getitem__(0)
         print(pic.shape)
         print(target)
+
+    background_processing = True
+    if background_processing:
+        imgs_path = os.path.join(os.getcwd(), r"dataset\TailoringNotAllBlack")
+        img_path = os.path.join(imgs_path, "Bao_01_08.jpg")
+        save_path = os.path.join(os.getcwd(), r"dataset\BackgroundProcessing")
+        myUtil.background_processing(img_path, save_path, 50, (208, 216, 229))
 
 
 if __name__ == "__main__":

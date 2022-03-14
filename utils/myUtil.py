@@ -1,5 +1,4 @@
 import cv2
-import json
 import os
 import pandas
 
@@ -8,7 +7,7 @@ def files_rename(path: str, start_name: str, suffix: str):
     """文件批量重命名
     Args:
         :param path: 文件所在目录
-        :param startName: 批量重命名的前缀
+        :param start_name: 批量重命名的前缀
         :param suffix: 文件后缀名
     """
     count = 0
@@ -147,4 +146,40 @@ def json_to_yololabel(json_path: str, save_path: str):
     """
     # TODO 后续添加
     pass
+
+
+def background_processing(img_path: str, save_path: str, threshold: int, pixel: tuple):
+    """将背景图片中小于阈值的像素进行替换
+        Args:
+            :param img_path: 图像路径
+            :param save_path: 修改后图像的保存路径文件夹
+            :param threshold: 像素阈值
+            :param pixel: 要替换的像素值，（B、G、R）格式
+        Raises:
+            FileNotFound: 如果读取文件失败，则抛出此异常
+            WriteFileError: 如果图片保存失败，则抛出此异常
+    """
+    img = cv2.imread(img_path)
+    if img is None:
+        ex = Exception("FileNotFound")
+        raise ex
+
+    img_name = img_path.split("\\")[-1]
+    for i in range(len(pixel)):
+        if pixel[i] > 255:
+            pixel[i] = 255
+        if pixel[i] < 0:
+            pixel[i] = 0
+
+    for i in range(len(img)):
+        for j in range(len(img[0])):
+            if img[i][j][0] < threshold and img[i][j][1] < threshold and img[i][j][2] < threshold:
+                img[i][j][0] = pixel[0]
+                img[i][j][1] = pixel[1]
+                img[i][j][2] = pixel[2]
+
+    if not cv2.imwrite(os.path.join(save_path, img_name), img):
+        ex = Exception("WriteFileError")
+        raise ex
+    print("function:background_processing - finish")
 

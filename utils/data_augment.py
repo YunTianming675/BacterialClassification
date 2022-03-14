@@ -14,7 +14,7 @@ class DataAugment(object):
         trans = torchvision.transforms.Compose([
             torchvision.transforms.ToPILImage(),
             torchvision.transforms.Resize(size=size),
-            torchvision.transforms.ToTensor()  # 将图片从numpy格式转换为tensor格式
+            torchvision.transforms.ToTensor()  # 将图片从numpy格式转换为tensor格式，会将值压缩至float[0.0 1.0]
         ])
         image = trans(img)
         return image, label
