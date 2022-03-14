@@ -40,12 +40,14 @@ def main():
         print(pic.shape)
         print(target)
 
-    background_processing = True
+    background_processing = False  # 对目标产生了干扰
     if background_processing:
         imgs_path = os.path.join(os.getcwd(), r"dataset\TailoringNotAllBlack")
-        img_path = os.path.join(imgs_path, "Bao_01_08.jpg")
         save_path = os.path.join(os.getcwd(), r"dataset\BackgroundProcessing")
-        myUtil.background_processing(img_path, save_path, 50, (208, 216, 229))
+        imgs = os.listdir(imgs_path)
+        for i in range(len(imgs)):
+            img_path = os.path.join(imgs_path, imgs[i])
+            myUtil.background_processing(img_path, save_path, (196, 208, 218))
 
 
 if __name__ == "__main__":
