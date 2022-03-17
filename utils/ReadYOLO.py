@@ -5,8 +5,6 @@ import torch
 
 from torch.utils.data import Dataset
 
-from utils import data_augment
-
 
 class ReadYOLO(Dataset):
 
@@ -64,4 +62,15 @@ class ReadYOLO(Dataset):
             return picture.unsqueeze(0).to(self.device), torch.from_numpy(array_target).to(self.device)
         else:
             return picture, array_target
+
+    def get_label_value(self):
+        """获取label内的值
+            Returns:
+                列表，元素是标签的值
+        """
+        label_value = list()
+        for i in range(len(self.labels)):
+            pic, target = self.__getitem__(i)
+            label_value.append(target)
+        return label_value
 

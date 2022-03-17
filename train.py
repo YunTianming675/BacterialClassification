@@ -1,6 +1,5 @@
 import argparse
 import os
-import time
 import torch
 
 from math import ceil
@@ -9,8 +8,6 @@ from torch.utils.data import DataLoader
 from utils.data_augment import DataAugment
 from utils.my_loss import MyLoss
 from utils.readYOLO import ReadYOLO
-
-# torch.backends.cudnn.enabled = False
 
 parser = argparse.ArgumentParser(description="VGG16 Training")
 parser.add_argument("--lr", default=0.001, help="learning rate of model")
@@ -55,39 +52,39 @@ def collect(batch):
 data = DataLoader(dataset, batch_size=args.batch_size, shuffle=True, drop_last=False, collate_fn=collect)
 
 
+def save_loss(list_loss: list):
+    file_path = os.path.join(os.getcwd(), r"dataset\list_loss.txt")
+    with open(file_path, "w") as file:
+        file.write(str(list_loss))
+        file.close()
+
+
 def train():
     epochs = args.epochs
     batch_count = 0
+    list_loss = []
     for epoch in range(epochs):
         for batch, (imgs, targets) in enumerate(data):
-            start = time.time()
             pred = net(imgs)
             var_loss = loss(pred, targets)
+            list_loss.append(float(var_loss))
             optimizer.zero_grad()
             var_loss.backward()
             optimizer.step()
-            # 训练完一个batch需要的时间
-            batch_time = time.time() - start
             # 剩下的训练完需要的迭代次数
             total_num = epochs * ceil(picture_num / args.batch_size) - batch_count
-            # 剩下的训练完需要的时间，返回的是秒
-            rest_time = total_num * batch_time
-            # 转化为 h/m/s
-            hour = int(rest_time / 60 // 60)
-            minute = int(rest_time // 60)
-            second = int((rest_time / 60 - minute) * 60)
             batch_count += 1
             print("epoch:{0}/{1}".format(epoch + 1, epochs),
                   " ,loss: ", float(var_loss),
-                  " ,每个batch所需时间：", batch_time,
-                  " ,剩余批次：", total_num,
-                  " ,eta: {0}小时{1}分钟{2}秒".format(hour, minute, second))
+                  " ,剩余批次：", total_num)
             if var_loss <= 1e-3:
                 torch.save(net.state_dict(), "./weights/An_Early_stop_params.pth".format(epoch + 1))
+                save_loss(list_loss)
                 return print("训练结束")
         # 每个 epoch 保存一次参数
         torch.save(net.state_dict(), "./weights/VGG16_epoch{}_params.pth".format(epoch + 1))
     print("训练结束")
+    save_loss(list_loss)
 
 
 if __name__ == "__main__":
