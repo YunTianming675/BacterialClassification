@@ -1,5 +1,6 @@
 # encoding=GBK
 
+import cv2
 import matplotlib.pyplot as plt
 import os
 import torch
@@ -21,7 +22,7 @@ def main():
             img_path = os.path.join(imgs_path, imgs[i])
             myUtil.image_tailoring(img_path, tail_save_path, 224, 224)
 
-    filter_all_black = True
+    filter_all_black = False
     if filter_all_black:
         imgs_path = os.path.join(os.getcwd(), r"dataset\changedImagesTailoring")
         imgs = os.listdir(imgs_path)
@@ -35,8 +36,8 @@ def main():
 
     label_conversion = False
     if label_conversion:
-        myUtil.csv_to_yololabel(os.path.join(os.getcwd(), r"dataset\test\1st_label.csv"),
-                                os.path.join(os.getcwd(), r"dataset\test\label"))
+        myUtil.csv_to_yololabel(os.path.join(os.getcwd(), r"dataset\train\1000.csv"),
+                                os.path.join(os.getcwd(), r"dataset\train\label"))
 
     test_ReadYOLO = False
     if test_ReadYOLO:
@@ -61,9 +62,9 @@ def main():
             img_path = os.path.join(imgs_path, imgs[i])
             myUtil.background_processing(img_path, save_path, (196, 208, 218))
 
-    draw_graph = False
+    draw_graph = True
     if draw_graph:
-        file_path = os.path.join(os.getcwd(), r"result\list_loss.txt")  # 保存loss记录的文件的路径
+        file_path = os.path.join(os.getcwd(), r"result\list_loss_2.txt")  # 保存loss记录的文件的路径
         # 读取保存的loss
         with open(file_path, "r") as file:
             text = file.read()
@@ -78,10 +79,10 @@ def main():
             list_loss.append(float(string1[i]))
         list_loss.append(float(string1[-1].split("]")[0]))
         plt.plot(list_loss)
-        plt.savefig(os.path.join(os.getcwd(), r"result\loss.jpg"))
+        plt.savefig(os.path.join(os.getcwd(), r"result\loss_2.jpg"))
         plt.show()
 
-    test_test = False
+    test_test = True
     if test_test:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # 加载模型
@@ -93,6 +94,28 @@ def main():
                                   os.path.join(os.getcwd(), r"dataset\test\label"))
         print(correct)
         print(judge)
+
+    check_background = False
+    if check_background:
+        imgs_path = os.path.join(os.getcwd(), r"dataset\TailoringNotAllBlack")
+        imgs = os.listdir(imgs_path)
+        img = myUtil.check_background(os.path.join(imgs_path, imgs[0]), 180)
+        cv2.imwrite(os.path.join(os.getcwd(), r"dataset\BackgroundProcessing", imgs[0]), img)
+
+    change_background = False
+    if change_background:
+        imgs_path = os.path.join(os.getcwd(), r"dataset\TailoringNotAllBlack")
+        imgs = os.listdir(imgs_path)
+        for i in range(len(imgs)):
+            img = myUtil.change_background(os.path.join(imgs_path, imgs[i]))
+            img.save(os.path.join(os.getcwd(), r"dataset\BackgroundProcessing", imgs[i]))
+        print("all finish")
+
+    select_img = False
+    if select_img:
+        imgs_path = os.path.join(os.getcwd(), r"dataset\train\image")
+        target_path = os.path.join(os.getcwd(), r"dataset\test\image")
+        myUtil.random_select(imgs_path, target_path)
 
 
 if __name__ == "__main__":

@@ -53,7 +53,7 @@ data = DataLoader(dataset, batch_size=args.batch_size, shuffle=True, drop_last=F
 
 
 def save_loss(list_loss: list):
-    file_path = os.path.join(os.getcwd(), r"dataset\list_loss.txt")
+    file_path = os.path.join(os.getcwd(), r"result\list_loss_3.txt")
     with open(file_path, "w") as file:
         file.write(str(list_loss))
         file.close()
