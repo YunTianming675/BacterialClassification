@@ -13,7 +13,7 @@ from utils import readYOLO
 
 
 def main():
-    img_tailoring = False
+    img_tailoring = False  # 图片裁剪
     if img_tailoring:
         imgs_path = os.path.join(os.getcwd(), r"dataset\changedImages")
         imgs = os.listdir(imgs_path)
@@ -22,7 +22,7 @@ def main():
             img_path = os.path.join(imgs_path, imgs[i])
             myUtil.image_tailoring(img_path, tail_save_path, 224, 224)
 
-    filter_all_black = False
+    filter_all_black = False  # 从裁剪的图片中筛选出不是全黑的图片
     if filter_all_black:
         imgs_path = os.path.join(os.getcwd(), r"dataset\changedImagesTailoring")
         imgs = os.listdir(imgs_path)
@@ -34,12 +34,12 @@ def main():
                 command = "copy " + imgs_path + "\\" + imgs[i] + " " + filter_save_path
                 os.system(command)
 
-    label_conversion = False
+    label_conversion = False  # 标签转换，csv -> yolo
     if label_conversion:
-        myUtil.csv_to_yololabel(os.path.join(os.getcwd(), r"dataset\train\1000.csv"),
-                                os.path.join(os.getcwd(), r"dataset\train\label"))
+        myUtil.csv_to_yololabel(os.path.join(os.getcwd(), r"dataset\test\test.csv"),
+                                os.path.join(os.getcwd(), r"dataset\test\label"))
 
-    test_ReadYOLO = False
+    test_ReadYOLO = False  # 对Read_YOLO类的测试
     if test_ReadYOLO:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         dataset = readYOLO.ReadYOLO(os.path.join(os.getcwd(), r"dataset\test\image"),
@@ -53,7 +53,7 @@ def main():
         print(type(label_value[0][0]))
         print(label_value[1][0][0])
 
-    background_processing = False  # 对目标产生了干扰
+    background_processing = False  # 二值法背景处理(对目标产生了干扰)
     if background_processing:
         imgs_path = os.path.join(os.getcwd(), r"dataset\TailoringNotAllBlack")
         save_path = os.path.join(os.getcwd(), r"dataset\BackgroundProcessing")
@@ -62,9 +62,9 @@ def main():
             img_path = os.path.join(imgs_path, imgs[i])
             myUtil.background_processing(img_path, save_path, (196, 208, 218))
 
-    draw_graph = True
+    draw_graph = False  # 通过train时记录的loss画出loss曲线
     if draw_graph:
-        file_path = os.path.join(os.getcwd(), r"result\list_loss_2.txt")  # 保存loss记录的文件的路径
+        file_path = os.path.join(os.getcwd(), r"result\list_loss_8.txt")  # 保存loss记录的文件的路径
         # 读取保存的loss
         with open(file_path, "r") as file:
             text = file.read()
@@ -79,10 +79,10 @@ def main():
             list_loss.append(float(string1[i]))
         list_loss.append(float(string1[-1].split("]")[0]))
         plt.plot(list_loss)
-        plt.savefig(os.path.join(os.getcwd(), r"result\loss_2.jpg"))
+        plt.savefig(os.path.join(os.getcwd(), r"result\loss_8.jpg"))
         plt.show()
 
-    test_test = True
+    test_test = False  # 加载train得的网络参数并查看准确率
     if test_test:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # 加载模型
@@ -95,14 +95,14 @@ def main():
         print(correct)
         print(judge)
 
-    check_background = False
+    check_background = False  # 背景处理（这个边缘处效果不好）
     if check_background:
         imgs_path = os.path.join(os.getcwd(), r"dataset\TailoringNotAllBlack")
         imgs = os.listdir(imgs_path)
         img = myUtil.check_background(os.path.join(imgs_path, imgs[0]), 180)
         cv2.imwrite(os.path.join(os.getcwd(), r"dataset\BackgroundProcessing", imgs[0]), img)
 
-    change_background = False
+    change_background = False  # 背景处理（这个方法的处理效果可以）
     if change_background:
         imgs_path = os.path.join(os.getcwd(), r"dataset\TailoringNotAllBlack")
         imgs = os.listdir(imgs_path)
@@ -111,7 +111,7 @@ def main():
             img.save(os.path.join(os.getcwd(), r"dataset\BackgroundProcessing", imgs[i]))
         print("all finish")
 
-    select_img = False
+    select_img = False  # 从处理好的图片中筛选一部分作为test，剩下的作为train
     if select_img:
         imgs_path = os.path.join(os.getcwd(), r"dataset\train\image")
         target_path = os.path.join(os.getcwd(), r"dataset\test\image")

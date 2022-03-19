@@ -11,8 +11,8 @@ from utils.readYOLO import ReadYOLO
 
 parser = argparse.ArgumentParser(description="VGG16 Training")
 parser.add_argument("--lr", default=0.001, help="learning rate of model")
-parser.add_argument("--momentum", default=0.9, type=float, help="momentum")
-parser.add_argument("--batch_size", default=4, type=int, help="batch_size")  # batch_size:一个批次的大小
+parser.add_argument("--momentum", default=0.01, type=float, help="momentum")  # 初始权重
+parser.add_argument("--batch_size", default=10, type=int, help="batch_size")  # batch_size:一个批次的大小
 parser.add_argument("--epochs", default=20, type=int, help="epochs")
 parser.add_argument("--weight_decay", default=5e-4, type=float, help="weight decay for SGD")
 
@@ -53,7 +53,7 @@ data = DataLoader(dataset, batch_size=args.batch_size, shuffle=True, drop_last=F
 
 
 def save_loss(list_loss: list):
-    file_path = os.path.join(os.getcwd(), r"result\list_loss_3.txt")
+    file_path = os.path.join(os.getcwd(), r"result\list_loss_8.txt")
     with open(file_path, "w") as file:
         file.write(str(list_loss))
         file.close()

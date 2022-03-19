@@ -138,6 +138,7 @@ def csv_to_yololabel(csv_path: str, save_path: str):
     img_label = csv_name.iloc[:, 1]
     for i, name in enumerate(img_name):
         with open(os.path.join(save_path, name.split(".")[0] + ".txt"), "w") as fp:
+            # 增加判断：make sense制作的标签数据格式读出来是str类型，而excel处理后则为numpy.int64类型
             val_type = str(type(img_label[i])).split("'")[1]
             if val_type == "str":
                 fp.write(img_label[i].split("[")[1].split("]")[0])
@@ -216,10 +217,18 @@ def check_background(img_path: str, threshold: int, pixel: tuple = (226, 243, 24
     return img
 
 
-def change_background(img_path: str) -> Image.Image:
+def change_background(img_path: str, black_threshold: int = 60, num_colors: int = 50,
+                      change_threshold: tuple = (180, 180, 180),
+                      select_threshold: tuple = (225, 225, 225),
+                      default: tuple = (247, 243, 226)) -> Image.Image:
     """提取背景色中RGB最高的像素值并以此像素值对阈值下的像素进行覆盖
         Args:
             :param img_path: 图片路径
+            :param black_threshold: 对黑色像素的判断阈值
+            :param num_colors: 提取背景主要颜色时，选择要提取多少个点
+            :param change_threshold: 被修改的像素的判断阈值，（RGB）
+            :param select_threshold: 从提取到的背景主要颜色中选择像素值最高的点，此参数控制选择的最低像素值（RGB）
+            :param default: 当没能找到符合要求的点时，默认以此像素值进行替换（RGB）
         Returns:
             :Image.Image: 修改后的图片
         Raise:
@@ -231,31 +240,45 @@ def change_background(img_path: str) -> Image.Image:
     except FileNotFoundError:
         ex = Exception("FileNotFound")
         raise ex
-    # 要提取的主要颜色数量
-    num_colors = 50
     small_image = image.resize((100, 100))
     result = small_image.convert('P', palette=Image.ADAPTIVE, colors=num_colors)
     result = result.convert('RGB')
     main_colors = result.getcolors(maxcolors=256)
     max_color = 0
-    col_extract1 = (247, 243, 226)  # 错误修复：当未能找到符合要求的点时默认以此替换
     for count, col in main_colors:
-        if (col[0] < 60) & (col[1] < 60) & (col[2] < 60):  # 剔除黑色
+        if (col[0] < black_threshold) and (col[1] < black_threshold) and (col[2] < black_threshold):  # 剔除黑色
             continue
 
-        elif (col[0] > 225) & (col[1] > 225) & (col[2] > 225):
+        elif (col[0] > select_threshold[0]) and (col[1] > select_threshold[1]) and (col[2] > select_threshold[2]):
             if count > max_color:
-                col_extract1 = col
+                default = col
                 max_color = count  # 获取图片中RGB值最高的索引
-    image1 = image
-    img_width = image1.size[0]  # 获取图片宽度
-    img_high = image1.size[1]  # 获取图片长度
-    col_extract2 = list(col_extract1)  # 背景色rgb值
+    img_width = image.size[0]  # 获取图片宽度
+    img_high = image.size[1]  # 获取图片长度
+    col_extract2 = list(default)  # 背景色rgb值
     for i in range(img_width):
         j = 0
         while j < img_high:
             r, g, b = image.getpixel((i, j))
-            if (r < 220) & (g < 220) & (b < 220):
+            if (r < change_threshold[0]) and (g < change_threshold[1]) and (b < change_threshold[2]):
+                r = col_extract2[0]
+                g = col_extract2[1]
+                b = col_extract2[2]
+                image.putpixel((i, j), (r, g, b))
+                j = j + 1
+            else:
+                j = img_high
+
+    # 图片翻转，修复部分黑色背景不被修改的问题
+    image1 = image.transpose(Image.FLIP_TOP_BOTTOM)
+    img_width = image.size[0]  # 获取图片宽度
+    img_high = image.size[1]  # 获取图片长度
+    col_extract2 = list(default)  # 背景色rgb值
+    for i in range(img_width):
+        j = 0
+        while j < img_high:
+            r, g, b = image1.getpixel((i, j))
+            if (r < change_threshold[0]) and (g < change_threshold[1]) and (b < change_threshold[2]):
                 r = col_extract2[0]
                 g = col_extract2[1]
                 b = col_extract2[2]
@@ -263,18 +286,9 @@ def change_background(img_path: str) -> Image.Image:
                 j = j + 1
             else:
                 j = img_high
-
-    for i in range(img_width):
-        for j in range(img_high):
-            r, g, b = image1.getpixel((i, j))
-            if (b > 250) & (r > 250) & (g > 250):
-                r = col_extract2[0]
-                g = col_extract2[1]
-                b = col_extract2[2]
-                image1.putpixel((i, j), (r, g, b))
     img_name = img_path.split("\\")[-1]
     print(img_name, "change finish")
-    return image1
+    return image1.transpose(Image.FLIP_TOP_BOTTOM)
 
 
 def random_select(imgs_path: str, target_path: str):
