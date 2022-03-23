@@ -1,4 +1,5 @@
 import cv2
+import matplotlib.pyplot as plt
 import numpy
 import os
 import pandas
@@ -319,3 +320,40 @@ def random_select(imgs_path: str, target_path: str):
     for i in range(len(select_shi)):
         os.system("move " + os.path.join(imgs_path, select_shi[i]) + " " + os.path.join(target_path, select_shi[i]))
     print("select finish")
+
+
+def draw(loss_file: str, c_file:str, save: str):
+    with open(loss_file, "r") as file:
+        text = file.read()
+        file.close()
+    string1 = text.split(",")
+    list_val = list()
+    list_val.append(float(string1[0].split("[")[1]))
+    for i in range(len(string1)):
+        if i == 0 or i == len(string1) - 1:
+            continue
+        list_val.append(float(string1[i]))
+    list_val.append(float(string1[-1].split("]")[0]))
+    list_val.append(float(string1[-1].split("]")[0]))
+
+    with open(c_file, "r") as file:
+        text = file.read()
+        file.close()
+    string2 = text.split(",")
+    list_c = list()
+    list_c.append(float(string2[0].split("[")[1]))
+    for i in range(len(string2)):
+        if i == 0 or i == len(string2) - 1:
+            continue
+        list_c.append(float(string2[i]))
+    list_c.append(float(string2[-1].split("]")[0]))
+    list_c.append(float(string2[-1].split("]")[0]))
+
+    x = list(range(1, len(list_c) + 1))
+    plt.plot(list_val, label="loss")
+    plt.plot(list_c, color="red", label="correct")
+    plt.legend(loc="best", fontsize=6)
+    plt.xticks(x)
+    plt.savefig(save)
+    plt.show()
+

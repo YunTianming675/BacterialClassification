@@ -3,6 +3,8 @@ import os
 import torch
 
 from math import ceil
+
+import test
 from model import VGG16
 from torch.utils.data import DataLoader
 from utils.data_augment import DataAugment
@@ -52,9 +54,8 @@ def collect(batch):
 data = DataLoader(dataset, batch_size=args.batch_size, shuffle=True, drop_last=False, collate_fn=collect)
 
 
-def save_loss(list_loss: list):
-    file_path = os.path.join(os.getcwd(), r"result\list_loss_8.txt")
-    with open(file_path, "w") as file:
+def save_loss(list_loss: list, path: str):
+    with open(path, "w") as file:
         file.write(str(list_loss))
         file.close()
 
@@ -62,7 +63,11 @@ def save_loss(list_loss: list):
 def train():
     epochs = args.epochs
     batch_count = 0
-    list_loss = []
+    list_loss = list()
+    loss_aver = list()
+    correct = list()
+    early_end = False
+    average = picture_num / args.batch_size  # 除数因子，一次训练完成后的loss除以它，获得平均loss
     for epoch in range(epochs):
         for batch, (imgs, targets) in enumerate(data):
             pred = net(imgs)
@@ -79,12 +84,40 @@ def train():
                   " ,剩余批次：", total_num)
             if var_loss <= 1e-3:
                 torch.save(net.state_dict(), "./weights/An_Early_stop_params.pth".format(epoch + 1))
-                save_loss(list_loss)
-                return print("训练结束")
+                early_end = True
+                # 测试，获得准确率
+                net_test = VGG16(mode="test")
+                net_test = net_test.to(device=device)
+                net_test.load_state_dict(torch.load("./weights/An_Early_stop_params.pth"))
+                c, j = test.run(net_test, os.path.join(os.getcwd(), r"dataset\test\image"),
+                                os.path.join(os.getcwd(), r"dataset\test\label"))
+                correct.append(c)
+                sum_2 = 0
+                for i in list_loss:
+                    sum_2 += i
+                loss_aver.append(sum_2 / batch)
+                list_loss.clear()
+                break
         # 每个 epoch 保存一次参数
-        torch.save(net.state_dict(), "./weights/VGG16_epoch{}_params.pth".format(epoch + 1))
+        if early_end:
+            early_end = False
+        else:
+            sum_l = 0
+            for i in list_loss:
+                sum_l += i
+            loss_aver.append(sum_l / average)
+            list_loss.clear()
+            torch.save(net.state_dict(), "./weights/VGG16_epoch{}_params.pth".format(epoch + 1))
+            # 测试，获得准确率
+            net_test = VGG16(mode="test")
+            net_test = net_test.to(device=device)
+            net_test.load_state_dict(torch.load("./weights/VGG16_epoch{}_params.pth".format(epoch + 1)))
+            c, j = test.run(net_test, os.path.join(os.getcwd(), r"dataset\test\image"),
+                            os.path.join(os.getcwd(), r"dataset\test\label"))
+            correct.append(c)
     print("训练结束")
-    save_loss(list_loss)
+    save_loss(loss_aver, os.path.join(os.getcwd(), r"result\list_loss_1.txt"))
+    save_loss(correct, os.path.join(os.getcwd(), r"result\correct_1.txt"))
 
 
 if __name__ == "__main__":

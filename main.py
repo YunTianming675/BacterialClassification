@@ -1,7 +1,6 @@
 # encoding=GBK
 
 import cv2
-import matplotlib.pyplot as plt
 import os
 import torch
 
@@ -15,23 +14,23 @@ from utils import readYOLO
 def main():
     img_tailoring = False  # 图片裁剪
     if img_tailoring:
-        imgs_path = os.path.join(os.getcwd(), r"dataset\changedImages")
+        imgs_path = os.path.join(os.getcwd(), r"dataset\test_01\ChangedImages")
         imgs = os.listdir(imgs_path)
-        tail_save_path = os.path.join(os.getcwd(), r"dataset\changedImagesTailoring")
+        save_path = os.path.join(os.getcwd(), r"dataset\test_01\Tailoring")
         for i in range(len(imgs)):
             img_path = os.path.join(imgs_path, imgs[i])
-            myUtil.image_tailoring(img_path, tail_save_path, 224, 224)
+            myUtil.image_tailoring(img_path, save_path, 224, 224)
 
     filter_all_black = False  # 从裁剪的图片中筛选出不是全黑的图片
     if filter_all_black:
-        imgs_path = os.path.join(os.getcwd(), r"dataset\changedImagesTailoring")
+        imgs_path = os.path.join(os.getcwd(), r"dataset\test_01\Tailoring")
         imgs = os.listdir(imgs_path)
-        filter_save_path = os.path.join(os.getcwd(), r"dataset\TailoringNotAllBlack")
+        filter_save_path = os.path.join(os.getcwd(), r"dataset\test_01\NotAllBlack")
         for i in range(len(imgs)):
-            if myUtil.is_all_black(os.path.join(imgs_path, imgs[i]), 50):
+            if myUtil.is_all_black(os.path.join(imgs_path, imgs[i]), 60):
                 continue
             else:
-                command = "copy " + imgs_path + "\\" + imgs[i] + " " + filter_save_path
+                command = "move " + imgs_path + "\\" + imgs[i] + " " + filter_save_path
                 os.system(command)
 
     label_conversion = False  # 标签转换，csv -> yolo
@@ -62,28 +61,14 @@ def main():
             img_path = os.path.join(imgs_path, imgs[i])
             myUtil.background_processing(img_path, save_path, (196, 208, 218))
 
-    draw_graph = False  # 通过train时记录的loss画出loss曲线
+    draw_graph = False  # 通过train时记录的loss和correct画出loss和correct曲线
     if draw_graph:
-        file_path = os.path.join(os.getcwd(), r"result\list_loss_8.txt")  # 保存loss记录的文件的路径
-        # 读取保存的loss
-        with open(file_path, "r") as file:
-            text = file.read()
-            file.close()
-        # 将loss转换为list，list元素类型是float
-        string1 = text.split(",")
-        list_loss = list()
-        list_loss.append(float(string1[0].split("[")[1]))
-        for i in range(len(string1)):
-            if i == 0 or i == len(string1) - 1:
-                continue
-            list_loss.append(float(string1[i]))
-        list_loss.append(float(string1[-1].split("]")[0]))
-        plt.plot(list_loss)
-        plt.savefig(os.path.join(os.getcwd(), r"result\loss_8.jpg"))
-        plt.show()
+        loss_file = os.path.join(os.getcwd(), r"result\list_loss_1.txt")  # 保存loss记录的文件的路径
+        c_file = os.path.join(os.getcwd(), r"result\correct_1.txt")  # 保存correct记录的文件的路径
+        myUtil.draw(loss_file, c_file, os.path.join(os.getcwd(), r"result\result_1.jpg"))
 
-    test_test = False  # 加载train得的网络参数并查看准确率
-    if test_test:
+    validate = False  # 加载train得的网络参数并查看准确率
+    if validate:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # 加载模型
         net = VGG16(mode="test")
@@ -104,11 +89,11 @@ def main():
 
     change_background = False  # 背景处理（这个方法的处理效果可以）
     if change_background:
-        imgs_path = os.path.join(os.getcwd(), r"dataset\TailoringNotAllBlack")
+        imgs_path = os.path.join(os.getcwd(), r"dataset\test_01\NotAllBlack")
         imgs = os.listdir(imgs_path)
         for i in range(len(imgs)):
             img = myUtil.change_background(os.path.join(imgs_path, imgs[i]))
-            img.save(os.path.join(os.getcwd(), r"dataset\BackgroundProcessing", imgs[i]))
+            img.save(os.path.join(os.getcwd(), r"dataset\test_01\BackgroundProcess", imgs[i]))
         print("all finish")
 
     select_img = False  # 从处理好的图片中筛选一部分作为test，剩下的作为train
@@ -116,6 +101,10 @@ def main():
         imgs_path = os.path.join(os.getcwd(), r"dataset\train\image")
         target_path = os.path.join(os.getcwd(), r"dataset\test\image")
         myUtil.random_select(imgs_path, target_path)
+
+    test_t = True  # 对没有标签的图片做预测
+    if test_t:
+        pass
 
 
 if __name__ == "__main__":
