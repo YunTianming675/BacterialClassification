@@ -32,7 +32,7 @@ class VGG16(nn.Module):
         self.block_count = block_count
         self.blocki = []
         self.block0 = VGG_block(input_channel=3, output_channel=inputs, use_1x1=False)  # 3 通道转 64 通道
-        self.blocki.extend(self.block0)  # entend方法将追加的列表中的值一个一个放入目标列表，（extend和append的不同
+        self.blocki.extend(self.block0)  # extend方法将追加的列表中的值一个一个放入目标列表，（extend和append的不同
         # setattr方法给对象添加变量，并指定变量的值
         # 字符串可以传值
         for count in range(1, block_count):

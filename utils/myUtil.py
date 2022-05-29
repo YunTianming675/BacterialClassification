@@ -293,8 +293,10 @@ def change_background(img_path: str, black_threshold: int = 60, num_colors: int 
 
 
 def random_select(imgs_path: str, target_path: str):
-    """
-
+    """随机挑选图片，具体挑选方法于函数内部控制
+        Args:
+            :param imgs_path：图片目录
+            :param target_path：保存目录
     """
     imgs = os.listdir(imgs_path)
     imgs_bao = list()
@@ -322,7 +324,7 @@ def random_select(imgs_path: str, target_path: str):
     print("select finish")
 
 
-def draw(loss_file: str, c_file:str, save: str):
+def draw(loss_file: str, c_file: str, save: str):
     with open(loss_file, "r") as file:
         text = file.read()
         file.close()
@@ -356,4 +358,40 @@ def draw(loss_file: str, c_file:str, save: str):
     plt.xticks(x)
     plt.savefig(save)
     plt.show()
+
+
+def analysis(detect: str, save: str):
+    """对预测结果进行分析
+        Args:
+            :param detect：预测的标签所在目录
+            :param save：分析结果保存目录
+    """
+    detect_files = os.listdir(detect)
+    num = len(detect_files)
+    count = {"Bao": 0, "Nian": 0, "Shi": 0, "None": 0}
+    for i in range(num):
+        with open(os.path.join(detect + "\\" + detect_files[i]), "r") as file:
+            text = file.read(1)
+            file.close()
+            if text == "1":
+                count["Bao"] += 1
+            elif text == "2":
+                count["Nian"] += 1
+            elif text == "3":
+                count["Shi"] += 1
+            elif text == "4":
+                count["None"] += 1
+            else:
+                continue
+    print(count)
+    bao = count["Bao"]
+    nian = count["Nian"]
+    shi = count["Shi"]
+    m = max([bao, nian, shi])
+    c = m / (bao + nian + shi)
+    with open(save + "\\result.txt", "w", encoding="utf-8") as file:
+        file.write(str(count))
+        file.write(" 正确率：%.1f" % (c * 100))
+        file.write("%")
+        file.close()
 

@@ -14,18 +14,18 @@ from utils import readYOLO
 def main():
     img_tailoring = False  # 图片裁剪
     if img_tailoring:
-        imgs_path = os.path.join(os.getcwd(), r"dataset\test_01\ChangedImages")
+        imgs_path = os.path.join(os.getcwd(), r"dataset\test_03\ChangedImages")
         imgs = os.listdir(imgs_path)
-        save_path = os.path.join(os.getcwd(), r"dataset\test_01\Tailoring")
+        save_path = os.path.join(os.getcwd(), r"dataset\test_03\Tailoring")
         for i in range(len(imgs)):
             img_path = os.path.join(imgs_path, imgs[i])
             myUtil.image_tailoring(img_path, save_path, 224, 224)
 
     filter_all_black = False  # 从裁剪的图片中筛选出不是全黑的图片
     if filter_all_black:
-        imgs_path = os.path.join(os.getcwd(), r"dataset\test_01\Tailoring")
+        imgs_path = os.path.join(os.getcwd(), r"dataset\test_03\Tailoring")
         imgs = os.listdir(imgs_path)
-        filter_save_path = os.path.join(os.getcwd(), r"dataset\test_01\NotAllBlack")
+        filter_save_path = os.path.join(os.getcwd(), r"dataset\test_03\NotAllBlack")
         for i in range(len(imgs)):
             if myUtil.is_all_black(os.path.join(imgs_path, imgs[i]), 60):
                 continue
@@ -89,11 +89,11 @@ def main():
 
     change_background = False  # 背景处理（这个方法的处理效果可以）
     if change_background:
-        imgs_path = os.path.join(os.getcwd(), r"dataset\test_01\NotAllBlack")
+        imgs_path = os.path.join(os.getcwd(), r"dataset\test_02\NotAllBlack")
         imgs = os.listdir(imgs_path)
         for i in range(len(imgs)):
             img = myUtil.change_background(os.path.join(imgs_path, imgs[i]))
-            img.save(os.path.join(os.getcwd(), r"dataset\test_01\BackgroundProcess", imgs[i]))
+            img.save(os.path.join(os.getcwd(), r"dataset\test_02\BackgroundProcess", imgs[i]))
         print("all finish")
 
     select_img = False  # 从处理好的图片中筛选一部分作为test，剩下的作为train
@@ -102,9 +102,22 @@ def main():
         target_path = os.path.join(os.getcwd(), r"dataset\test\image")
         myUtil.random_select(imgs_path, target_path)
 
-    test_t = True  # 对没有标签的图片做预测
+    test_t = False  # 对没有标签的图片做预测
     if test_t:
-        pass
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # 加载模型
+        net = VGG16(mode="test")
+        net = net.to(device=device)
+        # 加载模型参数
+        net.load_state_dict(torch.load("./weights/An_Early_stop_params.pth"))
+        test.test(net, os.path.join(os.getcwd(), r"dataset\test_03\NotAllBlack"),
+                  os.path.join(os.getcwd(), r"dataset\test_03\detect"))
+
+    analysis = False  # 对预测结果进行分析
+    if analysis:
+        detect = os.path.join(os.getcwd(), r"dataset\test_03\detect")
+        save = os.path.join(os.getcwd(), r"dataset\test_03\result")
+        myUtil.analysis(detect, save)
 
 
 if __name__ == "__main__":
